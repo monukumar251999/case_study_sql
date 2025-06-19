@@ -33,3 +33,17 @@ group by customer_id
 select distinct s.customer_id ,first_value(m.product_name) over(partition by s.customer_id order by s.order_date) from dbo.sales s 
 join dbo.menu m on s.product_id = m.product_id
 
+
+-- What is the most purchased item on the menu and how many times was it purchased by all customers?
+with highest_product as (
+    select customer_id,product_name,COUNT(*) as product_count from dbo.sales s join dbo.menu m on s.product_id = m.product_id
+    group by customer_id,product_name
+)
+select customer_id,product_name,product_count from 
+(select customer_id,product_name,product_count,ROW_NUMBER() over(partition by customer_id order by product_count desc) as rn from highest_product) a
+where rn=1
+
+
+
+
+
