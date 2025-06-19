@@ -27,3 +27,9 @@ group by s.customer_id
 
 select customer_id,COUNT(distinct order_date) from dbo.sales
 group by customer_id
+
+
+-- What was the first item from the menu purchased by each customer?
+select distinct s.customer_id ,first_value(m.product_name) over(partition by s.customer_id order by s.order_date) from dbo.sales s 
+join dbo.menu m on s.product_id = m.product_id
+
