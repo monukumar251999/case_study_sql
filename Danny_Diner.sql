@@ -22,3 +22,8 @@ You can inspect the entity relationship diagram and example data below.
 select s.customer_id,sum(m.price) from dbo.sales s 
 join dbo.menu m on s.product_id = m.product_id 
 group by s.customer_id
+
+-- 2. How many days has each customer visited the restaurant?
+
+select customer_id,COUNT(distinct order_date) from dbo.sales
+group by customer_id
