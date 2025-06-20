@@ -74,6 +74,15 @@ select customer_id,count(m.product_name) as total_product,SUM(price)as total_amo
 join menu m on c.product_id = m.product_id
 GROUP BY customer_id
 
+-- If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+with customer_data as (
+
+select s.customer_id,product_id,ROW_NUMBER() OVER(partition by s.customer_id order by DATEDIFF(day,order_date,join_date) desc ) as rn from dbo.sales  s join dbo.members  m on s.customer_id = m.customer_id and order_date <join_date
+
+)
+select customer_id,sum(case when product_name='sushi' then 20 else 10 end )as points from customer_data c 
+join menu m on c.product_id = m.product_id
+GROUP BY customer_id
 
 
 
