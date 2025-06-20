@@ -36,8 +36,8 @@ join dbo.menu m on s.product_id = m.product_id
 
 -- What is the most purchased item on the menu and how many times was it purchased by all customers?
 with highest_product as (
-    select customer_id,product_name,COUNT(*) as product_count from dbo.sales s join dbo.menu m on s.product_id = m.product_id
-    group by customer_id,product_name
+select customer_id,product_name,COUNT(*) as product_count from dbo.sales s join dbo.menu m on s.product_id = m.product_id
+group by customer_id,product_name
 )
 select customer_id,product_name,product_count from 
 (select customer_id,product_name,product_count,ROW_NUMBER() over(partition by customer_id order by product_count desc) as rn from highest_product) a
@@ -60,12 +60,19 @@ where rn=1
 
 -- Which item was purchased first by the customer after they became a member?
 with customer_data as (
-
 select s.customer_id,product_id,DATEDIFF(day,order_date,join_date) as days ,ROW_NUMBER() OVER(partition by s.customer_id order by DATEDIFF(day,order_date,join_date)) as rn from dbo.sales  s join dbo.members  m on s.customer_id = m.customer_id and order_date <join_date
-
 )
 select customer_id,m.product_name from customer_data c join menu m on c.product_id = m.product_id
 where rn=1
+
+
+-- What is the total items and amount spent for each member before they became a member?
+with customer_data as (
+select s.customer_id,product_id,ROW_NUMBER() OVER(partition by s.customer_id order by DATEDIFF(day,order_date,join_date) desc ) as rn from dbo.sales  s join dbo.members  m on s.customer_id = m.customer_id and order_date <join_date
+)
+select customer_id,count(m.product_name) as total_product,SUM(price)as total_amount from customer_data c 
+join menu m on c.product_id = m.product_id
+GROUP BY customer_id
 
 
 
