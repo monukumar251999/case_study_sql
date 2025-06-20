@@ -57,7 +57,16 @@ select *,ROW_NUMBER() OVER(partition by customer_id order by product_cnt desc) a
 
 ) a 
 where rn=1
-    
+
+-- Which item was purchased first by the customer after they became a member?
+with customer_data as (
+
+select s.customer_id,product_id,DATEDIFF(day,order_date,join_date) as days ,ROW_NUMBER() OVER(partition by s.customer_id order by DATEDIFF(day,order_date,join_date)) as rn from dbo.sales  s join dbo.members  m on s.customer_id = m.customer_id and order_date <join_date
+
+)
+select customer_id,m.product_name from customer_data c join menu m on c.product_id = m.product_id
+where rn=1
+
 
 
 
