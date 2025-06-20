@@ -44,6 +44,22 @@ select customer_id,product_name,product_count from
 where rn=1
 
 
+-- Which item was the most popular for each customer?
+
+with product_cnt as (
+select s.customer_id,product_name,count(product_name) product_cnt from dbo.sales s
+ join dbo.menu m on s.product_id  = m.product_id
+ GROUP BY s.customer_id,product_name
+
+)
+select customer_id ,product_name as most_popular_product from (
+select *,ROW_NUMBER() OVER(partition by customer_id order by product_cnt desc) as rn from product_cnt
+
+) a 
+where rn=1
+    
+
+
 
 
 
